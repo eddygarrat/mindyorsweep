@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="welcome-container">
+        <header>
+            <h1>Welcome to Minesweeper!</h1>
+            <p class="description">
+                The classic puzzle game where you need to clear a minefield without detonating any mines.
+                Left-click to reveal a cell, right-click to place a flag. The numbers show how many mines
+                are adjacent to that cell. Good luck!
+            </p>
+        </header>
+
+        <div class="game-controls">
+            <div class="difficulty-selector">
+                <h3>Select Difficulty:</h3>
+                <button id="easy-btn">Easy (9×9, 10 mines)</button>
+                <button id="medium-btn">Medium (16×16, 40 mines)</button>
+                <button id="hard-btn">Hard (30×16, 99 mines)</button>
+            </div>
+
+            <div class="custom-game">
+                <h3>Or Custom Game:</h3>
+                <div class="custom-inputs">
+                    <input type="number" id="width-input" min="5" max="30" placeholder="Width">
+                    <input type="number" id="height-input" min="5" max="30" placeholder="Height">
+                    <input type="number" id="mines-input" min="1" placeholder="Mines">
+                    <button id="start-btn">Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container" style="display: none;">
+            <div class="game-info">
+                <div class="mines-counter">Mines: <span id="mines-count">10</span></div>
+                <button id="reset-btn">😊</button>
+                <div class="timer">Time: <span id="time">0</span></div>
+            </div>
+            <div id="board"></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
