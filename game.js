@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
+
+  document.addEventListener('DOMContentLoaded', function() {
     // Game state variables
     let board = [];
     let revealed = [];
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let treasures = 5;
     let maxBlasts = 3;
     let blastsRemaining;
+    const WIN_SCORE = 300;
     
     // Game settings
     let width = 9;
@@ -151,6 +153,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('game-container').classList.remove('shake');
                 }, 500);
                 
+                // Hide half of revealed cells after blast
+                setTimeout(() => hideHalfRevealedCells(), 500);
+                
                 // Check if all blasts used
                 if (blastsRemaining === 0) {
                     setTimeout(() => {
@@ -165,20 +170,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (board[y][x] === -2) {
-            score += 5;
+            // Treasure found
+            score += 100;
             scoreElement.textContent = score;
             board[y][x] = 0;
+        } else if (board[y][x] > 0) {
+            // Number cell
+            score += board[y][x];
+            scoreElement.textContent = score;
         }
         
         revealCell(x, y);
         
-        if (checkWin()) {
+        if (score >= WIN_SCORE) {
             gameOver = true;
             resetButton.textContent = '😎';
             clearInterval(timer);
+            setTimeout(() => alert(`Congratulations! You reached ${WIN_SCORE} points!`), 100);
         }
     }
     
+    function hideHalfRevealedCells() {
+        // Get all revealed cells that aren't mines or treasures
+        const revealableCells = [];
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                if (revealed[y][x] && board[y][x] > 0) { // Only hide number cells
+                    revealableCells.push({x, y});
+                }
+            }
+        }
+        
+        // Shuffle the array
+        revealableCells.sort(() => Math.random() - 0.5);
+        
+        // Hide half of them
+        const cellsToHide = Math.floor(revealableCells.length / 2);
+        for (let i = 0; i < cellsToHide; i++) {
+            const {x, y} = revealableCells[i];
+            revealed[y][x] = false;
+            updateCell(x, y);
+        }
+    }
+    
+    // ... (keep other functions the same as previous version)
     function handleRightClick(x, y) {
         if (gameOver || revealed[y][x]) return;
         
@@ -285,17 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (board[y][x] === -2) {
             cell.classList.add('treasure-hidden');
         }
-    }
-    
-    function checkWin() {
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                if (board[y][x] !== -1 && !revealed[y][x]) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
     
     function startTimer() {
