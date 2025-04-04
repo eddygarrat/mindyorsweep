@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let firstClick = true;
     let timer = null;
     let seconds = 0;
+    let score = 0;
+    let treasures = 5; // Number of treasure boxes
     
     // Game settings
     let width = 9;
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const boardElement = document.getElementById('board');
     const minesCountElement = document.getElementById('mines-count');
     const timeElement = document.getElementById('time');
+    const scoreElement = document.getElementById('score'); // Add this element to your HTML
     const resetButton = document.getElementById('reset-btn');
     const gameContainer = document.getElementById('game-container');
     
@@ -25,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         width = 9;
         height = 9;
         mines = 10;
+        treasures = 5;
         startGame();
     });
     
@@ -32,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         width = 16;
         height = 16;
         mines = 40;
+        treasures = 8;
         startGame();
     });
     
@@ -39,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         width = 30;
         height = 16;
         mines = 99;
+        treasures = 12;
         startGame();
     });
     
@@ -48,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const maxMines = Math.floor(width * height * 0.35);
         mines = parseInt(document.getElementById('mines-input').value) || 10;
         mines = Math.min(mines, maxMines);
+        treasures = Math.min(parseInt(document.getElementById('treasures-input').value) || 5, 
+                            Math.floor(width * height * 0.1)); // Limit treasures to 10% of board
         startGame();
     });
     
@@ -73,14 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
         flagged = Array(height).fill().map(() => Array(width).fill(false));
         gameOver = false;
         firstClick = true;
+        score = 0;
         
         // Reset timer
         clearInterval(timer);
         seconds = 0;
         timeElement.textContent = '0';
         
-        // Update mines counter
+        // Update UI
         minesCountElement.textContent = mines;
+        scoreElement.textContent = '0';
         resetButton.textContent = '😊';
         
         // Create board UI
@@ -111,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (firstClick) {
             firstClick = false;
             placeMines(x, y);
+            placeTreasures(x, y); // Place treasures after mines
             startTimer();
         }
         
@@ -121,6 +132,14 @@ document.addEventListener('DOMContentLoaded', function() {
             resetButton.textContent = '😵';
             clearInterval(timer);
             return;
+        }
+        
+        // Check if it's a treasure
+        if (board[y][x] === -2) {
+            score += 5;
+            scoreElement.textContent = score;
+            // Mark treasure as collected
+            board[y][x] = 0; // Convert to regular empty cell
         }
         
         revealCell(x, y);
@@ -138,6 +157,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             }
+        }
+    }
+    
+    function placeTreasures(firstX, firstY) {
+        let treasuresPlaced = 0;
+        
+        while (treasuresPlaced < treasures) {
+            const x = Math.floor(Math.random() * width);
+            const y = Math.floor(Math.random() * height);
+            
+            // Don't place treasure on first click position, mines, or existing treasures
+            if ((x === firstX && y === firstY) || board[y][x] === -1 || board[y][x] === -2) {
+                continue;
+            }
+            
+            board[y][x] = -2; // -2 represents a treasure
+            treasuresPlaced++;
         }
     }
     
@@ -173,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const nx = x + dx;
                     const ny = y + dy;
                     
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && board[ny][nx] !== -1) {
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && board[ny][nx] !== -1 && board[ny][nx] !== -2) {
                         board[ny][nx]++;
                     }
                 }
@@ -220,6 +256,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (board[y][x] === -1) {
                 cell.classList.add('mine');
                 cell.textContent = '💣';
+            } else if (board[y][x] === -2) {
+                // Treasure cell (shouldn't happen as we convert to 0 when clicked)
+                cell.classList.add('treasure');
+                cell.textContent = '💰';
             } else if (board[y][x] > 0) {
                 cell.textContent = board[y][x];
                 cell.classList.add(`cell-${board[y][x]}`);
@@ -227,6 +267,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (flagged[y][x]) {
             cell.classList.add('flagged');
             cell.textContent = '🚩';
+        } else if (board[y][x] === -2 && !revealed[y][x]) {
+            // Hidden treasure (visual indication)
+            cell.classList.add('treasure-hidden');
         }
     }
     
