@@ -50,6 +50,22 @@
         </div>
         <div id="board"></div>
     </div>
+    <div>
+    <label for="mines-input">Bombs:</label>
+    <input type="number" id="mines-input" min="1" max="50" value="3">
+</div>
+<div>
+    <label for="treasures-input">Treasures:</label>
+    <input type="number" id="treasures-input" min="1" max="50" value="5">
+</div>
+<div>
+    <label for="blasts-input">Max Blasts:</label>
+    <input type="number" id="blasts-input" min="1" max="10" value="3">
+</div>
+
+<!-- Add this to your game info display -->
+<div>Blasts Left: <span id="blasts-remaining">3</span></div>
+
 
     <script src="game.js"></script>
 </body>
